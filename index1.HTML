@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Machakos University Projects Portal</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        :root{--bg:#f5fbf6;--card:#ffffff;--muted:#6b7280;--accent:#0f62fe}
+        *{box-sizing:border-box}
+        body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:#111}
+        header{background:linear-gradient(90deg,#0f62fe20,#7c3aed10);padding:18px 20px;display:flex;align-items:center;gap:16px}
+        h1{font-size:18px;margin:0}
+        nav{margin-left:auto;display:flex;gap:8px}
+        button.tab{background:transparent;border:1px solid transparent;padding:8px 12px;border-radius:8px;cursor:pointer}
+        button.tab.active{background:var(--card);box-shadow:0 1px 2px rgba(16,24,40,.06);border-color:#e6eef8}
+        .wrap{max-width:1100px;margin:20px auto;padding:18px}
+        .grid{display:grid;grid-template-columns:1fr 380px;gap:18px}
+        .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(16,24,40,.06)}
+        label{display:block;margin-bottom:6px;font-size:13px;color:var(--muted)}
+        input[type=text],input[type=password],select,textarea{width:100%;padding:10px;border:1px solid #e6eef8;border-radius:8px;background:#fff}
+        textarea{min-height:110px;resize:vertical}
+        .row{display:flex;gap:12px}
+        .row > *{flex:1}
+        .small{font-size:13px;color:var(--muted);margin-top:6px}
+        .btn{background:var(--accent);color:#fff;padding:10px 12px;border:none;border-radius:8px;cursor:pointer}
+        .btn.ghost{background:transparent;color:var(--accent);border:1px solid #e6eef8}
+        .list{max-height:520px;overflow:auto;margin-top:12px}
+        .proj{border:1px solid #eef2ff;padding:12px;border-radius:10px;margin-bottom:10px}
+        .meta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}
+        .badge{background:#eef2ff;color:var(--accent);padding:4px 8px;border-radius:999px;font-size:12px}
+        .actions{display:flex;gap:8px;margin-top:8px}
+        .link{color:var(--accent);text-decoration:none;font-weight:600}
+        .searchRow{display:flex;gap:8px;align-items:center}
+        .muted{color:var(--muted)}
+        footer{padding:12px;text-align:center;font-size:13px;color:var(--muted)}
+        .danger{background:#ff4d4f;color:#fff}
+        @media (max-width:900px){.grid{grid-template-columns:1fr;}.wrap{padding:12px}}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Machakos University Projects Portal</h1>
+        <nav>
+            <button class="tab active" data-tab="upload">Upload</button>
+            <button class="tab" data-tab="browse">Browse</button>
+            <button class="tab" data-tab="admin">Admin</button>
+        </nav>
+    </header>
+
+    <main class="wrap">
+        <div class="grid">
+            <section id="mainPanel" class="card">
+                <!-- Upload -->
+                <div id="uploadView">
+                    <h2 style="margin-top:0">Submit Project</h2>
+                    <form id="projectForm">
+                        <div class="row">
+                            <div>
+                                <label>Student Name</label>
+                                <input type="text" id="studentName" required />
+                                <br>
+                                <label>year of study</label>
+                                <input type="text" id="Year Of study" required/>
+                                <label>course_id</label>y
+                                <input type="text" id="course_id" required/>
+                                <label>Registration number</label>
+                                <input type="text" id="Registration number"/>
+                            </div>
+                            <div>
+                                <label>Department</label>
+                                <select id="department" required>
+                                    <option>Computer Science</option>
+                                    <option>Electrical Engineering</option>
+                                    <option>Mechanical Engineering</option>
+                                    <option>Civil Engineering</option>
+                                    <option>Business</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label>Project Title</label>
+                        <input type="text" id="title" required />
+
+                        <label>Description</label>
+                        <textarea id="description" placeholder="Short abstract"></textarea>
+
+                        <label>Tags (comma separated)</label>
+                        <input type="text" id="tags" placeholder="ai,web,embedded" />
+
+                        <label>Upload File (PDF / ZIP) </label>
+                        <input type="file" id="fileInput" accept=".pdf,.zip,.doc,.docx,.pptx,.jpeg" />
+
+                        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                            <button class="btn" type="submit">Submit</button>
+                            <button class="btn ghost" id="clearForm" type="button">Clear</button>
+                        </div>
+
+                        <p class="small">Submitted projects must be approved by admin before appearing in the public browse/search.</p>
+                    </form>
+                </div>
+
+                <!-- Browse -->
+                <div id="browseView" style="display:none">
+                    <h2 style="margin-top:0">Browse Projects</h2>
+                    <div class="searchRow" style="margin-bottom:10px">
+                        <input type="text" id="searchBox" placeholder="Search by title, description, tags, department" />
+                        <select id="filterDept">
+                            <option value="">All departments</option>
+                            <option>Computer Science</option>
+                            <option>Electrical Engineering</option>
+                            <option>Mechanical Engineering</option>
+                            <option>Civil Engineering</option>
+                            <option>Business</option>
+                            <option>Other</option>
+                        </select>
+                        <button class="btn ghost" id="resetFilters">Reset</button>
+                    </div>
+                    <div id="results" class="list"></div>
+                </div>
+
+                <!-- Admin -->
+                <div id="adminView" style="display:none">
+                    <h2 style="margin-top:0">Admin Panel</h2>
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+                        <input type="password" id="adminpass"placeholder="Admin password" />
+                        <button class="btn" id="adminLogin">Login</button>
+                        <span id="adminStatus" class="muted">Not authenticated</span>
+                    </div>
+
+                    <div id="adminControls" style="display:none">
+                        <p class="small">Pending submissions</p>
+                        <div id="pendingList" class="list"></div>
+                        <hr style="margin:12px 0" />
+                        <p class="small">All projects (approve / reject)</p>
+                        <div id="allList" class="list"></div>
+                        <div style="margin-top:8px">
+                            <button class="btn danger" id="wipeAll">Delete All (Danger)</button>
+                            <span class="small muted" style="margin-left:8px">This clears stored projects from this browser.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="card">
+                <h3 style="margin-top:0">Info</h3>
+
+                <h4 style="margin-bottom:6px">How it works</h4>
+                <ul style="padding-left:18px;margin-top:6px">
+                    <li class="small muted">Students submit projects; they remain pending until admin approves.</li>
+                    <li class="small muted">Admin authenticates with password and can approve/delete entries.</li>
+                    <li class="small muted">Approved projects are searchable and downloadable.</li>
+                </ul>
+
+                <div style="margin-top:12px">
+                    <label>Admin default password</label>
+                    <input type="text" value="adminpass" readonly />
+                    <p class="small muted">Change in code for production.</p>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer>University Projects Portal — Prototype</footer>
+
+    <script>
+        // Simple client-side project manager using localStorage
+        const STORAGE_KEY = 'uni_projects_v1';
+        const ADMIN_PASS = 'adminpass';
+
+        // Helper
+        function loadProjects() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+        function saveProjects(arr) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+        }
+        function uid() {
+            return 'p_' + Math.random().toString(36).slice(2,9);
+        }
+
+        // UI elements
+        const tabs = document.querySelectorAll('.tab');
+        const views = { upload: document.getElementById('uploadView'), browse: document.getElementById('browseView'), admin: document.getElementById('adminView') };
+        tabs.forEach(t=>{
+            t.addEventListener('click',()=>{
+                tabs.forEach(x=>x.classList.remove('active'));
+                t.classList.add('active');
+                const name=t.dataset.tab;
+                Object.keys(views).forEach(k=>views[k].style.display = (k===name ? '' : 'none'));
+                if(name==='browse') renderResults();
+                if(name==='admin') refreshAdmin();
+            });
+        });
+
+        // Form
+        const form = document.getElementById('projectForm');
+        const fileInput = document.getElementById('fileInput');
+        document.getElementById('clearForm').addEventListener('click', ()=> form.reset());
+
+        form.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const dept = document.getElementById('department').value;
+            const title = document.getElementById('title').value.trim();
+            const desc = document.getElementById('description').value.trim();
+            const tags = document.getElementById('tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+            const file = fileInput.files[0];
+            let fileData = null;
+            if(file){
+                fileData = await readFileAsDataURL(file);
+            }
+            const projects = loadProjects();
+            const project = {
+                id: uid(),
+                student: name,
+                department: dept,
+                title,
+                description: desc,
+                tags,
+                fileName: file ? file.name : null,
+                fileData,
+                approved: false,
+                createdAt: new Date().toISOString()
+            };
+            projects.push(project);
+            saveProjects(projects);
+            alert('Project submitted for approval.');
+            form.reset();
+            renderPending();
+        });
+
+        function readFileAsDataURL(file){
+            return new Promise((res,rej)=>{
+                const fr = new FileReader();
+                fr.onload = ()=>res(fr.result);
+                fr.onerror = rej;
+                fr.readAsDataURL(file);
+            });
+        }
+
+        // Browse / Search
+        const resultsEl = document.getElementById('results');
+        const searchBox = document.getElementById('searchBox');
+        const filterDept = document.getElementById('filterDept');
+        const resetFilters = document.getElementById('resetFilters');
+
+        function renderResults(){
+            const q = (searchBox.value || '').trim().toLowerCase();
+            const dept = filterDept.value;
+            const projects = loadProjects().filter(p=>p.approved);
+            const out = projects.filter(p=>{
+                if(dept && p.department !== dept) return false;
+                if(!q) return true;
+                const hay = [p.title,p.description,p.department,(p.tags||[]).join(' ') ,p.student].join(' ').toLowerCase();
+                return hay.includes(q);
+            });
+            resultsEl.innerHTML = out.length ? out.map(renderProjectCard).join('') : '<p class="muted">No approved projects match.</p>';
+        }
+
+        searchBox.addEventListener('input', renderResults);
+        filterDept.addEventListener('change', renderResults);
+        resetFilters.addEventListener('click', ()=>{ searchBox.value=''; filterDept.value=''; renderResults(); });
+
+        function renderProjectCard(p){
+            const date = new Date(p.createdAt).toLocaleString();
+            const fileLink = p.fileData ? `<a class="link" href="${p.fileData}" download="${encodeURIComponent(p.fileName)}">Download ${escapeHtml(p.fileName)}</a>` : '';
+            const tags = (p.tags||[]).map(t=>`<span class="badge">${escapeHtml(t)}</span>`).join(' ');
+            return `
+                <div class="proj">
+                    <strong>${escapeHtml(p.title)}</strong>
+                    <div class="meta">
+                        <span>${escapeHtml(p.student)}</span>
+                        <span>${escapeHtml(p.department)}</span>
+                        <span>${date}</span>
+                        ${tags}
+                    </div>
+                    <p style="margin:8px 0">${escapeHtml(p.description)}</p>
+                    <div class="actions">${fileLink}</div>
+                </div>
+            `;
+        }
+
+        // Admin
+        const adminLoginBtn = document.getElementById('adminLogin');
+        const adminPassInput = document.getElementById('adminPass');
+        const adminStatus = document.getElementById('adminStatus');
+        const adminControls = document.getElementById('adminControls');
+        const pendingList = document.getElementById('pendingList');
+        const allList = document.getElementById('allList');
+        const wipeAllBtn = document.getElementById('wipeAll');
+
+        let isAdmin = false;
+        adminLoginBtn.addEventListener('click', ()=>{
+            const pass = adminPassInput.value || '';
+            if(pass === ADMIN_PASS){
+                isAdmin = true;
+                adminStatus.textContent = 'Authenticated';
+                adminPassInput.value = '';
+                adminControls.style.display = '';
+                refreshAdmin();
+            } else {
+                alert('Invalid password');
+            }
+        });
+
+        function refreshAdmin(){
+            if(!isAdmin) return;
+            renderPending();
+            renderAll();
+        }
+
+        function renderPending(){
+            if(!isAdmin) return;
+            const pending = loadProjects().filter(p=>!p.approved);
+            pendingList.innerHTML = pending.length ? pending.map(p=>renderPendingItem(p)).join('') : '<p class="muted">No pending submissions.</p>';
+        }
+
+        function renderAll(){
+            if(!isAdmin) return;
+            const all = loadProjects();
+            allList.innerHTML = all.length ? all.map(p=>renderAllItem(p)).join('') : '<p class="muted">No projects stored.</p>';
+        }
+
+        function renderPendingItem(p){
+            const date = new Date(p.createdAt).toLocaleString();
+            const fileLink = p.fileData ? `<a class="link" href="${p.fileData}" download="${encodeURIComponent(p.fileName)}">Download</a>` : '';
+            const tags = (p.tags||[]).map(t=>`<span class="badge">${escapeHtml(t)}</span>`).join(' ');
+            return `
+                <div class="proj" id="pend-${p.id}">
+                    <strong>${escapeHtml(p.title)}</strong>
+                    <div class="meta"><span>${escapeHtml(p.student)}</span><span>${escapeHtml(p.department)}</span><span>${date}</span>${tags}</div>
+                    <p style="margin:8px 0">${escapeHtml(p.description)}</p>
+                    <div class="actions">
+                        ${fileLink}
+                        <button class="btn" onclick="approve('${p.id}')">Approve</button>
+                        <button class="btn ghost" onclick="removeProject('${p.id}')">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAllItem(p){
+            const date = new Date(p.createdAt).toLocaleString();
+            const status = p.approved ? '<span style="color:green">approved</span>' : '<span style="color:orange">pending</span>';
+            const fileLink = p.fileData ? `<a class="link" href="${p.fileData}" download="${encodeURIComponent(p.fileName)}">Download</a>` : '';
+            return `
+                <div class="proj" id="all-${p.id}">
+                    <strong>${escapeHtml(p.title)} <small>(${status})</small></strong>
+                    <div class="meta"><span>${escapeHtml(p.student)}</span><span>${escapeHtml(p.department)}</span><span>${date}</span></div>
+                    <p style="margin:8px 0">${escapeHtml(p.description)}</p>
+                    <div class="actions">
+                        ${fileLink}
+                        ${p.approved ? `<button class="btn ghost" onclick="unapprove('${p.id}')">Unapprove</button>` : `<button class="btn" onclick="approve('${p.id}')">Approve</button>`}
+                        <button class="btn ghost" onclick="removeProject('${p.id}')">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Expose functions for inline onclick handlers
+        window.approve = function(id){
+            const arr = loadProjects();
+            const idx = arr.findIndex(p=>p.id===id);
+            if(idx===-1) return;
+            arr[idx].approved = true;
+            saveProjects(arr);
+            refreshAdmin();
+            renderResults();
+        };
+
+        window.unapprove = function(id){
+            const arr = loadProjects();
+            const idx = arr.findIndex(p=>p.id===id);
+            if(idx===-1) return;
+            arr[idx].approved = false;
+            saveProjects(arr);
+            refreshAdmin();
+            renderResults();
+        };
+
+        window.removeProject = function(id){
+            if(!confirm('Delete this project?')) return;
+            let arr = loadProjects();
+            arr = arr.filter(p=>p.id!==id);
+            saveProjects(arr);
+            refreshAdmin();
+            renderResults();
+        };
+
+        wipeAllBtn.addEventListener('click', ()=>{
+            if(!confirm('Delete all projects from local storage?')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            refreshAdmin();
+            renderResults();
+            alert('All projects removed from this browser.');
+        });
+
+        // Utilities
+        function escapeHtml(s=''){
+            return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        // Initialize
+        renderResults();
+
+        // Render pending periodically (helps when others use same browser tab)
+        setInterval(()=>{ if(isAdmin) renderPending(); }, 3000);
+    </script>
+</body>
+</html>
